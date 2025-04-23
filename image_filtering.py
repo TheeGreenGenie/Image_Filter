@@ -245,7 +245,35 @@ class ImageFilterApp:
             self.status_var.set(f"Error laoding image: {str(e)}")
 
     def display_image(self):
-        pass
+        if self.current_image:
+            canvas_width = self.canvas.winfo_width()
+            canvas_height = self.canvas.winfo_height()
+
+            img_width, img_height = self.current_image.size
+
+
+            display_width = int(img_width * self.zoom_factor)
+            display_height = int(img_height * self.zoom_factor)
+
+            if display_width > canvas_width or display_height > canvas_height:
+                width_ratio = canvas_width / display_width
+                height_ratio = canvas_height / display_height
+                ratio = min(width_ratio, height_ratio)
+
+                display_width = int(display_width * ratio)
+                display_height = int(display_height * ratio)
+            
+            display_img = self.current_image.copy()
+            display_img = display_img.resize((display_width, display_height),  Image.LANCZOS)
+
+            self.displayed_image = ImageTk.PhotoImage(display_img)
+
+            self.canvas.delete('all')
+            self.canvas.create_image(
+                canvas_width // 2, canvas_height // 2,
+                image=self.displayed_image,
+                anchor=tk.CENTER
+            )
 
     def reset_to_original(self):
         pass
