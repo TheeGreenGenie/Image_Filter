@@ -5,6 +5,7 @@ import os
 import numpy as np
 from pathlib import Path
 import cv2
+from tkinterdnd2 import DND_FILES, TkinterDnD
 
 class ImageFilterApp:
     def __init__(self, root):
@@ -208,16 +209,40 @@ class ImageFilterApp:
         status_bar.pack(side=tk.BOTTOM, fill=tk.X)
 
     def setup_drag_drop(self):
-        pass
+        self.canvas.drop_target_register("DND_Files")
+        self.canvas.dnd_bind('<<Drop>>', self.drop)
 
     def drop(self, event):
-        pass
+        file_path = event.data.strip('{}')
+        if os.path.isfile(file_path):
+            self.load_image(file_path)
 
     def upload_image(self):
-        pass
+        file_path = filedialog.askopenfilename(
+            filetypes=[
+                ("Image files", "*.jpg *.jpeg *.png *.bmp *.gif *.webp"),
+                ("All files", "*.*")
+            ]
+        )
+        if file_path:
+            self.load_image(file_path)
 
     def load_image(self, file_path):
-        pass
+        try:
+            self.filename = file_path
+            self.original_image = Image.open(file_path)
+            self.current_image = self.original_image.copy()
+            self.display_image()
+
+
+            base_name = os.path.splitext(base_name)[0]
+            name_without_ext = os.path.splitext(base_name)[0]
+            self.export_filename.set(f"{name_without_ext}_filtered")
+
+
+            self.status_var.set(f"Loaded image: {base_name}")
+        except Exception as e:
+            self.status_var.set(f"Error laoding image: {str(e)}")
 
     def display_image(self):
         pass
@@ -304,7 +329,7 @@ class ImageFilterApp:
         pass
 
 if __name__ == "__main__":
-    root = tk.Tk()
+    root = TkinterDnD.Tk()
     app = ImageFilterApp(root)
 
 
