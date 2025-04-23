@@ -455,19 +455,79 @@ class ImageFilterApp:
         self.status_var.set("Zoom reset to 1.0x")
 
     def start_crop(self):
-        pass
+        if self.current_image:
+            self.canvas.bind("<ButtonPress-1>", self.on_crop_start)
+            self.canvas.bind("<B1-Motion>", self.on_crop_drag)
+            self.canvas.bind("<ButtonRelease-1>", self.on_crop_release)
+            self.status_var.set("Click and drag to select crop area, then release mouse button")
+            self.crop_rect = None
+            self.crop_start_x = None
+            self.crop_start_y = None
 
     def on_crop_start(self, event):
-        pass
+        self.crop_start_x = self.canvas.canvasx(event.x)
+        self.crop_start_y = self.canvas.canvasy(event.y)
+
+        if self.crop_rect:
+            self.canvas.delete(self.crop_rect)
+        self.crop_rect = self.canvas.create_rectangle(
+            self.crop_start_x, self.crop_start_y,
+            self.crop_start_x, self.crop_start_y,
+            outline='red', width=2
+        )
 
     def on_crop_drag(self, event):
-        pass
+        cur_x = self.canvas.canvasx(event.x)
+        cur_y = self.canvas.canvasy(event.y)
+        self.canvas.coords(self.crop_rect, self.crop_start_x, self.crop_start_y, cur_x, cur_y)
 
     def on_crop_release(self, event):
-        pass
+        if not self.crop_rect:
+            return
+        
+        end_x = self.canvas.canvasx(event.x)
+        end_y = self.canvas.canvasy(event.y)
+
+        canvas_width = self.canvas.winfo_width()
+        canvas_height = self.canvas.winfo_height()
+
+        img_width, img_height = self.displayed_image.width(), self.displayed_image.height()
+        img_x = (canvas_width - img_width) // 2
+        img_y = (canvas_height - img_height) // 2
+
+        crop_left = max(0, self.crop_start_x - img_x)
+        crop_top = max(0, self.crop_start_y - img_y)
+        crop_right = min(img_width, end_x - img_x)
+        crop_bottom = min(img_height, end_y - img_y)
+
+        if crop_right <= crop_left or crop_bottom <= crop_top:
+            self.status_var.set("Invalid crop area selected")
+            self.canvas.delete(self.crop_rect)
+            self.crop_rect = None
+            return
+        
+        scale_factor = self.current_image.width / img_width
+
+        actual_left  = int(crop_left * scale_factor)
+        actual_top = int(crop_top * scale_factor)
+        actual_right = int(crop_right * scale_factor)
+        actual_bottom = int(crop_bottom * scale_factor)
+
+        self.current_image = self.current_image.crop((actual_left, actual_top, actual_right, actual_bottom))
+
+        self.canvas.delete(self.crop_rect)
+        self.crop_rect = None
+        self.display_image()
+        self.status_var.set("Image cropped succesfully")
+
+        self.canvas.unbind("<ButtonPress-1>")
+        self.canvas.unbind("<B1-Motion>")
+        self.canvas.unbind("<ButtonRelease-1>")
 
     def apply_edge_detection(self):
-        pass
+        if self.current_image:
+            img_np = np.array(self.current_image)
+            img_np = cv2.cvtColor(img_np, cv2.COLOR_RGB2BGR)
 
     def apply_vignette(self):
         pass
