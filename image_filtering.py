@@ -535,13 +535,57 @@ class ImageFilterApp:
 
             self.current_image = Image.fromarray(edges_rgb)
             self.display_image()
-            self.status_var.set("Applied Edge Detection")
+            self.status_var.set("Applied: Edge Detection")
 
     def apply_vignette(self):
-        pass
+        if self.current_image:
+            img_np = np.array(self.current_image)
+
+            rows, cols = img_np.shape[:2]
+
+            X = np.linspace(-1, 1, cols)
+            Y = np.linspace(-1, 1, rows)
+            x, y = np.meshgrid(X, Y)
+            radius = np.sqrt(X, Y)
+
+            vignette = np.clip(1.0 - radius**2, 0, 1)
+            vignette = vignette.reshape(rows, cols, 1)
+
+            img_np = img_np * vignette
+
+            self.current_image = Image.fromarray(np.uint8(img_np))
+            self.display_image()
+            self.status_var.set("Applied: Vignette")
 
     def apply_vintage(self):
-        pass
+        if self.current_image:
+            img_np = np.array(self.current_image).astype(np.float64)
+
+            sepia_matrix = np.array([
+                [0.393, 0.769, 0.189],
+                [0.349, 0.686, 0.168],
+                [0.272, 0.534, 0.131]
+            ])
+
+            sepia_img = np.zeros_like(img_np)
+            for i in range(3):
+                sepia_img[:, :, i] = np.sum(img_np * sepia_matrix[i, :].reshape(1, 1, 3), axis=2)
+
+            sepia_img = np.clip(sepia_img, 0, 255).astype(np.uint8)
+
+            rows, cols = sepia_img.shape[:2]
+            X = np.linspace(-1, 1, cols)
+            Y = np.linspace(-1, 1, rows)
+            x, y = np.meshgrid(X, Y)
+            radius = np.sqrt(x**2 + y**2)
+
+            vignette = np.clip(1.0 - radius**1.5 * 0.5, 0.6, 1)
+            vignette = vignette.reshape(rows, cols, 1)
+
+            vintage_img = sepia_img * vignette
+
+            noise = np.random.randint(0, 15, vintage_img.shape)
+            vintage_img = np.clip(vintage_img + noise, 0, 255).astype(np.uint8)
 
     def apply_color_inversion(self):
         pass
