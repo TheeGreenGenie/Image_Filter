@@ -318,6 +318,15 @@ class ImageFilterApp:
 
     def apply_bw_threshold(self):
         if self.current_image:
+          gray_img = ImageOps.grayscale(self.current_image)
+
+          threshold = 127
+          self.current_image = gray_img.point(lambda p: 255 if p > threshold else 0).convert('RGB')
+          self.display_image()
+          self.status_var.set('Applied: Black & White Threshold')
+
+    def adjust_brightness(self, value):
+        if self.original_image:
             temp_img = self.original_image.copy()
 
             if self.rotation_angle != 0:
@@ -326,9 +335,6 @@ class ImageFilterApp:
                 temp_img = ImageOps.mirror(temp_img)
             if self.flip_vertical:
                 temp_img = ImageOps.flip(temp_img)
-
-    def adjust_brightness(self, value):
-        pass
 
     def adjust_contrast(self, value):
         pass
