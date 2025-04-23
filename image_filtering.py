@@ -529,6 +529,14 @@ class ImageFilterApp:
             img_np = np.array(self.current_image)
             img_np = cv2.cvtColor(img_np, cv2.COLOR_RGB2BGR)
 
+            edges = cv2.Canny(img_np, 100, 200)
+
+            edges_rgb = cv2.cvtColor(edges, cv2.COLOR_GRAY2RGB)
+
+            self.current_image = Image.fromarray(edges_rgb)
+            self.display_image()
+            self.status_var.set("Applied Edge Detection")
+
     def apply_vignette(self):
         pass
 
