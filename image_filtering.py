@@ -311,10 +311,21 @@ class ImageFilterApp:
 
 
     def apply_negative(self):
-        pass
+        if self.current_image:
+            self.current_image = ImageOps.invert(self.current_image)
+            self.display_image()
+            self.status_var.set("Applied: Negative")
 
     def apply_bw_threshold(self):
-        pass
+        if self.current_image:
+            temp_img = self.original_image.copy()
+
+            if self.rotation_angle != 0:
+                temp_img = temp_img.rotate(self.rotation_angle, expand=True)
+            if self.flip_horizontal:
+                temp_img = ImageOps.mirror(temp_img)
+            if self.flip_vertical:
+                temp_img = ImageOps.flip(temp_img)
 
     def adjust_brightness(self, value):
         pass
