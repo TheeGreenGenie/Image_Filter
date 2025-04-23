@@ -450,7 +450,9 @@ class ImageFilterApp:
         self.status_var.set("Zoom reset to 1.0x")
 
     def reset_zoom(self):
-        pass
+        self.zoom_factor = 1.0
+        self.display_image()
+        self.status_var.set("Zoom reset to 1.0x")
 
     def start_crop(self):
         pass
