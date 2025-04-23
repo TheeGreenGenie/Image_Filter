@@ -588,16 +588,102 @@ class ImageFilterApp:
             vintage_img = np.clip(vintage_img + noise, 0, 255).astype(np.uint8)
 
     def apply_color_inversion(self):
-        pass
+        if self.current_image:
+            self.current_image = ImageOps.invert(self.current_image)
+            self.display_image()
+            self.status_var.set("Applied: Color Inversion")
 
     def save_image(self):
-        pass
+        if not self.current_image:
+            self.status_var.set("No image to save!")
+            return
+        
+        format_str = self.export_format.get()
+        quality = self.export_format.get()
+        filename = self.export_filename.get()
+
+        if "." in filename:
+            filename = filename.split(".")[0]
+        
+        if format_str == 'jpeg':
+            ext = ".jpg"
+        elif format_str == 'png':
+            ext = ".png"
+        elif format_str == 'webp':
+            ext = ".webp"
+        else:
+            ext = f".{format_str}"
+
+        output_filename = filename + ext
+
+        save_path = filedialog.asksaveasfilename(
+            defaultextension=ext,
+            initialfile=output_filename,
+            filetypes=[
+                (f"{format_str.upper()} files", f"{ext}"),
+                ("All files", "*.*")
+            ]
+        )
+
+        if save_path:
+            try:
+                self.current_image.save(save_path, format=format_str.upper(), quality=quality)
+                self.status_var.set(f"Image saved as {os.path.basename(save_path)}")
+            except Exception as e:
+                self.status_var.set(f"Error saving image: {str(e)}")
 
     def save_before_after(self):
-        pass
+        if not self.original_image or not self.current_image:
+            self.status_var.set("Neew both original and processed images to save a comparison")
+            return
+        
+        original_width, original_height = self.original_image.size
+        current_width, current_height = self.current_image.size
+
+        combined_wdith = original_width + current_width
+        combined_height = max(original_height, current_height)
+
+        combined_image = Image.new('RGB', (combined_wdith, combined_height), (255, 255, 255))
+
+        combined_image.paste(self.original_image, (0, 0))
+        combined_image.paste(self.current_image, (original_width, 0))
+
+        format_str = self.export_format.get()
+        quality = self.export_quality.get()
+        filename = self.export_filename.get()
+
+        if "." in filename:
+            filename = filename.split(".")[0]
+
+        if format_str == 'jpeg':
+            ext = '.jpg'
+        elif format_str == 'png':
+            ext = '.png'
+        elif format_str == 'webp':
+            ext = '.webp'
+        else:
+            ext = f".{format_str}"
+
+        output_filename = filename + "_comparison" + ext
+
+        save_path = filedialog.asksaveasfilename(
+            defaultextension=ext,
+            initialfile=output_filename,
+            filetypes=[
+                (f"{format_str.upper()} files", f"*{ext}")
+                ("All files", "*.*")
+            ]
+        )
+
+        if save_path:
+            try:
+                combined_image.save(save_path, format=format_str.upper(), quality=quality)
+                self.status_var.set(f"Comparison image saved as {os.path.basename(save_path)}")
+            except Exception as e:
+                self.status_var.set(f"Error saving comparison image: {str(e)}")
 
     def on_resize(self, event):
-        pass
+        self.root.after(100, self.display_image)
 
 if __name__ == "__main__":
     root = TkinterDnD.Tk()
