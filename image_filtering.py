@@ -276,7 +276,14 @@ class ImageFilterApp:
             )
 
     def reset_to_original(self):
-        pass
+        if self.original_image:
+            self.current_image = self.original_image.copy()
+            self.rotation_angle = 0
+            self.flip_horizontal = False
+            self.flip_vertical = False
+            self.zoom_factor = 1.0
+            self.display_image()
+            self.status_var.set("Reset to original image")
     
     def apply_grayscale(self):
         pass
