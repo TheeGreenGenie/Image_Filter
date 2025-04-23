@@ -286,10 +286,29 @@ class ImageFilterApp:
             self.status_var.set("Reset to original image")
     
     def apply_grayscale(self):
-        pass
+        if self.current_image:
+            self.current_image = ImageOps.grayscale(self.current_image).convert('RGB')
+            self.display_image()
+            self.status_var.set('Applied: Grayscale')
 
     def apply_sepia(self):
-        pass
+        if self.current_image:
+            gray_img = ImageOps.grayscale(self.current_image)
+
+            sepia_data = np.array(gray_img)
+            sepia_data = cv2.cvtColor(sepia_data, cv2.COLOR_GRAY2RGB)
+
+            sepia_data = sepia_data.astype(np.float64)
+            sepia_data[:, :, 0] = sepia_data[:, :, 0] * 0.393 + sepia_data[:, :, 1] * 0.769 + sepia_data[:, :, 2] * 0.189
+            sepia_data[:, :, 1] = sepia_data[:, :, 0] * 0.349 + sepia_data[:, :, 1] * 0.686 + sepia_data[:, :, 2] * 0.168
+            sepia_data[:, :, 2] = sepia_data[:, :, 0] * 0.272 + sepia_data[:, :, 1] * 0.534 + sepia_data[:, :, 2] * 0.131
+
+            sepia_data = np.clip(sepia_data, 0, 255).astype(np.uint8)
+
+            self.current_image = Image.fromarray(sepia_data)
+            self.display_image()
+            self.status_var.set("Applied: Sepia")
+
 
     def apply_negative(self):
         pass
