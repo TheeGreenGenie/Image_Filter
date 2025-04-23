@@ -377,10 +377,46 @@ class ImageFilterApp:
             self.status_var.set(f"Saturation: {value}%")
 
     def adjust_blur(self, value):
-        pass
+        if self.original_image:
+            # Create a copy of the original image for adjustments
+            temp_img = self.original_image.copy()
+            
+            # Apply previous transformations
+            if self.rotation_angle != 0:
+                temp_img = temp_img.rotate(self.rotation_angle, expand=True)
+            if self.flip_horizontal:
+                temp_img = ImageOps.mirror(temp_img)
+            if self.flip_vertical:
+                temp_img = ImageOps.flip(temp_img)
+
+            radius = float(value)
+            if radius > 0:
+                self.current_image = temp_img.filter(ImageFilter.GaussianBlur(radius=radius))
+            else:
+                self.current_image = temp_img
+            self.display_image()
+            self.status_var.set(f"Blur: {value}")
 
     def adjust_sharpen(self, value):
-        pass
+        if self.original_image:
+            # Create a copy of the original image for adjustments
+            temp_img = self.original_image.copy()
+            
+            # Apply previous transformations
+            if self.rotation_angle != 0:
+                temp_img = temp_img.rotate(self.rotation_angle, expand=True)
+            if self.flip_horizontal:
+                temp_img = ImageOps.mirror(temp_img)
+            if self.flip_vertical:
+                temp_img = ImageOps.flip(temp_img)
+
+            factor = float(value)
+            if factor > 0:
+                self.current_image = temp_img.filter(ImageFilter.UnsharpMask(radius=2, percent=factor * 50, threshold=3))
+            else:
+                self.current_image = temp_img
+            self.display_image()
+            self.status_var.set(f"Sharpen: {value}")
 
     def rotate_image(self, degreese):
         pass
