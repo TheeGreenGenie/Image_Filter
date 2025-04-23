@@ -418,20 +418,36 @@ class ImageFilterApp:
             self.display_image()
             self.status_var.set(f"Sharpen: {value}")
 
-    def rotate_image(self, degreese):
-        pass
+    def rotate_image(self, degrees):
+        if self.current_image:
+            self.rotation_angle = (self.rotation_angle + degrees) % 360
+            self.current_image = self.current_image.rotate(degrees, expand=True)
+            self.display_image()
+            self.status_var.set(f"Rotated image {degrees}")
 
     def flip_horizontal_image(self):
-        pass
+        if self.current_image:
+            self.flip_horizontal = not self.flip_horizontal
+            self.current_image = ImageOps.mirror(self.current_image)
+            self.display_image()
+            self.status_var.set("Flipped image horizontally")
 
     def flip_vertical_image(self):
-        pass
+        if self.current_image:
+            self.flip_vertical = not self.flip_vertical
+            self.current_image = ImageOps.flip(self.current_image)
+            self.display_image()
+            self.status_var.set("Flipped image vertically")
 
     def zoom_in(self):
-        pass
+        self.zoom_factor *= 1.2
+        self.display_image()
+        self.status_var.set(f"Zoom: {self.zoom_factor:.2f}x")
 
     def zoom_out(self):
-        pass
+        self.zoom_factor /= 1.2
+        self.display_image()
+        self.status_var.set("Zoom reset to 1.0x")
 
     def reset_zoom(self):
         pass
